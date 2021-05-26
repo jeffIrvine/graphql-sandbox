@@ -3,28 +3,47 @@ const expressGraphQL = require('express-graphql').graphqlHTTP
 const {
   GraphQLSchema,
   GraphQLObjectType,
-  GraphQLString
+  GraphQLString,
+  GraphQLList,
+  GraphQLInt,
+  GraphQLNonNull
 } = require('graphql')
 const app = express()
 
-const schema = new GraphQLSchema({
-  query: new GraphQLObjectType({
-    name: 'Helloworld',
-    fields: () => ({
-      message: {
-        type: GraphQLString,
-        resolve: () => 'Hello World'
-      }
-    })
+const BookType = new GraphQLObjectType({
+  name: 'Book',
+  description: 'A book written by an Author',
+  fields: () => ({
+    id: { type: GraphQLNonNull(GraphQLInt)},
+    name: { type: GraphQLNonNull(GraphQLString)},
+    authorId: { type: GraphQLNonNull(GraphQLInt) }
   })
 })
 
+const RootQueryType = new GraphQLObjectType({
+  name: 'query',
+  description: 'root query',
+  fields: () => ({
+    books: {
+      type: new GraphQLList(BookType),
+      description: 'A list of books',
+      resolve: () => books
+    }
+  })
+})
+
+const schema = new GraphQLSchema({
+  query: RootQueryType,
+})
+
 app.use('/graphql', expressGraphQL({
-  schema: schema,  
+  schema: schema,
   graphiql: true
 
 }))
 app.listen(8000., () => console.log('server is running '))
+
+
 
 
 
